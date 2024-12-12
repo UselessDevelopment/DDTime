@@ -98,13 +98,14 @@ void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys
 	Msg.m_Level = level;
 	Msg.m_HaveColor = have_color;
 	Msg.m_Color = color;
-	str_timestamp_format(Msg.m_aTimestamp, sizeof(Msg.m_aTimestamp), FORMAT_SPACE);
+	Msg.m_aTimestamp[0] = 0;
+	//str_timestamp_format(Msg.m_aTimestamp, sizeof(Msg.m_aTimestamp), FORMAT_SPACE);
 	Msg.m_TimestampLength = str_length(Msg.m_aTimestamp);
 	str_copy(Msg.m_aSystem, sys);
 	Msg.m_SystemLength = str_length(Msg.m_aSystem);
 
 	// TODO: Add level?
-	str_format(Msg.m_aLine, sizeof(Msg.m_aLine), "%s %c %s: ", Msg.m_aTimestamp, "EWIDT"[level], Msg.m_aSystem);
+	str_format(Msg.m_aLine, sizeof(Msg.m_aLine), "%s [%s]: ", Msg.m_aTimestamp, Msg.m_aSystem);
 	Msg.m_LineMessageOffset = str_length(Msg.m_aLine);
 
 	char *pMessage = Msg.m_aLine + Msg.m_LineMessageOffset;
