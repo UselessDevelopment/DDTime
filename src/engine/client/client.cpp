@@ -729,9 +729,16 @@ void CClient::DummyConnect()
 		log_info("client", "Dummy is not allowed on this server.");
 		return;
 	}
-	if(DummyConnected() || DummyConnecting())
+	if(DummyConnecting())
 	{
-		log_info("client", "Dummy is already connected/connecting.");
+		log_info("client", "Dummy is already connecting.");
+		return;
+	}
+	if(DummyConnected())
+	{
+		// causes log spam with connect+swap binds
+		// https://github.com/ddnet/ddnet/issues/9426
+		// log_info("client", "Dummy is already connected.");
 		return;
 	}
 	if(DummyConnectingDelayed())
@@ -1210,6 +1217,11 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	{
 		Info = pEntry->m_Info;
 	}
+	else
+	{
+		Info.m_NumAddresses = 1;
+		Info.m_aAddresses[0] = *pFrom;
+	}
 
 	Info.m_Type = SavedType;
 
@@ -1359,9 +1371,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			// us.
 			if(SavedType >= m_CurrentServerInfo.m_Type)
 			{
-				mem_copy(&m_CurrentServerInfo, &Info, sizeof(m_CurrentServerInfo));
-				m_CurrentServerInfo.m_NumAddresses = 1;
-				m_CurrentServerInfo.m_aAddresses[0] = ServerAddress();
+				m_CurrentServerInfo = Info;
 				m_CurrentServerInfoRequestTime = -1;
 			}
 
@@ -1582,7 +1592,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				{
 					char aUrl[256];
 					char aEscaped[256];
-					EscapeUrl(aEscaped, sizeof(aEscaped), m_aMapdownloadFilename + 15); // cut off downloadedmaps/
+					EscapeUrl(aEscaped, m_aMapdownloadFilename + 15); // cut off downloadedmaps/
 					bool UseConfigUrl = str_comp(g_Config.m_ClMapDownloadUrl, "https://maps.ddnet.org") != 0 || m_aMapDownloadUrl[0] == '\0';
 					str_format(aUrl, sizeof(aUrl), "%s/%s", UseConfigUrl ? g_Config.m_ClMapDownloadUrl : m_aMapDownloadUrl, aEscaped);
 

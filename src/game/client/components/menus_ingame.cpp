@@ -262,9 +262,18 @@ void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_ALL, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 
-	MainView.HSplitTop(25.0f, &Label, &MainView);
+	MainView.HSplitTop(25.0f, &Row, &MainView);
 	MainView.HSplitTop(5.0f, nullptr, &MainView);
+	Row.VSplitLeft(Row.h, nullptr, &Row);
+	Row.VSplitRight(Row.h, &Row, &Button);
+	Row.VMargin(5.0f, &Label);
 	Ui()->DoLabel(&Label, Localize("Edit touch controls"), 20.0f, TEXTALIGN_MC);
+
+	static CButtonContainer s_OpenHelpButton;
+	if(DoButton_FontIcon(&s_OpenHelpButton, FONT_ICON_QUESTION, 0, &Button))
+	{
+		Client()->ViewLink(Localize("https://wiki.ddnet.org/wiki/Touch_controls"));
+	}
 
 	MainView.HSplitTop(25.0f, &Row, &MainView);
 	MainView.HSplitTop(5.0f, nullptr, &MainView);
@@ -1139,7 +1148,7 @@ int CMenus::GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stor
 
 	if(time_get_nanoseconds() - pSelf->m_GhostPopulateStartTime > 500ms)
 	{
-		pSelf->RenderLoading(Localize("Loading ghost files"), "", 0, false);
+		pSelf->RenderLoading(Localize("Loading ghost files"), "", 0);
 	}
 
 	return 0;
